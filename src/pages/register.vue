@@ -2,6 +2,7 @@
 import { ErrorMessage, Field, useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
+import { registerUser } from '@/api/user'
 
 const schema = toTypedSchema(
   z.object({
@@ -22,7 +23,8 @@ const [password, passwordAttrs] = defineField('password')
 const [confirmPassword, confirmPasswordAttr] = defineField('confirmPassword')
 
 const register = handleSubmit(async (values) => {
-  console.log(JSON.stringify(values, null, 2))
+  const { data } = await registerUser(values)
+  console.log(data)
 })
 </script>
 
