@@ -1,26 +1,17 @@
 <script setup lang="ts">
-import { ErrorMessage, Field, useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
+import { ErrorMessage, Field } from 'vee-validate'
 import { z } from 'zod'
+import { useUserForm } from './user'
 import { registerUser } from '@/api/user'
 
-const schema = toTypedSchema(
-  z.object({
-    username: z.string({ message: '用户名不能为空' }).min(6, '用户名至少6个字符'),
-    email: z.string({ message: '邮箱不能为空' }).email('请输入有效的电子邮箱地址').min(1, '邮箱不能为空'),
-    password: z.string({ message: '密码不能为空' }).min(6, '至少包含6个字符'),
-    confirmPassword: z.string({ message: '两次密码不一致' }).min(6, '至少包含6个字符'),
-  }).refine(data => data.password === data.confirmPassword, { message: '两次密码不一致', path: ['confirmPassword'] }),
-)
+const schema = z.object({
+  username: z.string({ message: '用户名不能为空' }).min(6, '用户名至少6个字符'),
+  email: z.string({ message: '邮箱不能为空' }).email('请输入有效的电子邮箱地址').min(1, '邮箱不能为空'),
+  password: z.string({ message: '密码不能为空' }).min(6, '至少包含6个字符'),
+  confirmPassword: z.string({ message: '两次密码不一致' }).min(6, '至少包含6个字符'),
+}).refine(data => data.password === data.confirmPassword, { message: '两次密码不一致', path: ['confirmPassword'] })
 
-const { handleSubmit, resetForm, defineField } = useForm({
-  validationSchema: schema,
-})
-
-const [email, emailAttrs] = defineField('email')
-const [username, usernameAttrs] = defineField('username')
-const [password, passwordAttrs] = defineField('password')
-const [confirmPassword, confirmPasswordAttr] = defineField('confirmPassword')
+const { handleSubmit, resetForm, email, password, username, confirmPassword } = useUserForm(schema)
 
 const register = handleSubmit(async (values) => {
   const { data } = await registerUser(values)
@@ -49,8 +40,8 @@ const register = handleSubmit(async (values) => {
 
       <div w="full">
         <Field
-          v-model="email"
-          :email-attrs
+          v-model="email.value"
+          :email-attrs="email.attr"
           name="email"
           placeholder="邮箱"
           class="w-full p-2 rounded-1 text-white !bg-transparent border border-solid border-[rgb(56,72,93)]"
@@ -59,8 +50,8 @@ const register = handleSubmit(async (values) => {
       </div>
       <div w="full">
         <Field
-          v-model="username"
-          :username-attrs
+          v-model="username.value"
+          :username-attrs="username.attr"
           name="username"
           placeholder="用户名"
           class="w-full p-2 rounded-1 text-white bg-transparent border border-solid border-[rgb(56,72,93)]"
@@ -69,8 +60,8 @@ const register = handleSubmit(async (values) => {
       </div>
       <div w="full">
         <Field
-          v-model="password"
-          :password-attrs
+          v-model="password.value.value"
+          :password-attrs="password.attr"
           name="password"
           type="password"
           placeholder="密码"
@@ -80,8 +71,8 @@ const register = handleSubmit(async (values) => {
       </div>
       <div w="full">
         <Field
-          v-model="confirmPassword"
-          :confirm-password-attr
+          v-model="confirmPassword.value.value"
+          :confirm-password-attr="confirmPassword.attr"
           name="confirmPassword"
           type="password"
           placeholder="确认密码"
@@ -109,7 +100,7 @@ const register = handleSubmit(async (values) => {
 
       <p text="white">
         已有账号？
-        <RouterLink to="/login" class="text-#53cd9b" cursor="pointer">
+        <RouterLink to="/user/login" class="text-#53cd9b" cursor="pointer">
           去登录
         </RouterLink>
       </p>

@@ -1,22 +1,15 @@
 <script setup lang="ts">
-import { ErrorMessage, Field, useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
+import { ErrorMessage, Field } from 'vee-validate'
 import { z } from 'zod'
+import { useUserForm } from './user'
 import { loginUser } from '@/api/user'
 
-const schema = toTypedSchema(
-  z.object({
-    email: z.string({ message: '邮箱不能为空' }).email('请输入有效的电子邮箱地址').min(1, '邮箱不能为空'),
-    password: z.string({ message: '密码不能为空' }).min(6, '至少包含6个字符'),
-  }),
-)
-
-const { handleSubmit, resetForm, defineField } = useForm({
-  validationSchema: schema,
+const schema = z.object({
+  email: z.string({ message: '邮箱不能为空' }).email('请输入有效的电子邮箱地址').min(1, '邮箱不能为空'),
+  password: z.string({ message: '密码不能为空' }).min(6, '至少包含6个字符'),
 })
 
-const [email, emailAttrs] = defineField('email')
-const [password, passwordAttrs] = defineField('password')
+const { handleSubmit, resetForm, email, password } = useUserForm(schema)
 
 const login = handleSubmit(async (values) => {
   const { data } = await loginUser(values)
@@ -45,8 +38,8 @@ const login = handleSubmit(async (values) => {
 
       <div w="full">
         <Field
-          v-model="email"
-          :email-attrs
+          v-model="email.value"
+          :email-attrs="email.attr"
           name="email"
           placeholder="邮箱"
           class="w-full p-2 rounded-1 text-white !bg-transparent border border-solid border-[rgb(56,72,93)]"
@@ -55,8 +48,8 @@ const login = handleSubmit(async (values) => {
       </div>
       <div w="full">
         <Field
-          v-model="password"
-          :password-attrs
+          v-model="password.value"
+          :password-attrs="password.attr"
           name="password"
           type="password"
           placeholder="密码"
@@ -84,7 +77,7 @@ const login = handleSubmit(async (values) => {
 
       <p text="white">
         没有账号？
-        <RouterLink to="/register" class="text-#53cd9b" cursor="pointer">
+        <RouterLink to="/user/register" class="text-#53cd9b" cursor="pointer">
           去注册
         </RouterLink>
       </p>
