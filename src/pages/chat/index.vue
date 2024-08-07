@@ -3,6 +3,6 @@
 
 <template>
   <div>
-    index
+    chat page
   </div>
 </template>

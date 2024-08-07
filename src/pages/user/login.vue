@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ErrorMessage, Field } from 'vee-validate'
 import { z } from 'zod'
 import { useUserForm } from './user'
+import FormField from './components/FormField.vue'
+import Logo from './components/Logo.vue'
 import { loginUser } from '@/api/user'
+import { setToken } from '@/utils/token'
 
 const schema = z.object({
   email: z.string({ message: '邮箱不能为空' }).email('请输入有效的电子邮箱地址').min(1, '邮箱不能为空'),
@@ -11,9 +13,15 @@ const schema = z.object({
 
 const { handleSubmit, resetForm, email, password } = useUserForm(schema)
 
+const router = useRouter()
+
 const login = handleSubmit(async (values) => {
   const { data } = await loginUser(values)
-  console.log(data)
+
+  if (data) {
+    setToken(data)
+    router.push('/chat')
+  }
 })
 </script>
 
@@ -29,34 +37,10 @@ const login = handleSubmit(async (values) => {
       flex="~ col items-center"
       gap="8"
     >
-      <div f="c-c" gap="4">
-        <img src="/src/assets/logo.png" alt="Logo" w="20" object="contain">
-        <h1 uppercase text="8 white">
-          vuechat
-        </h1>
-      </div>
+      <Logo />
 
-      <div w="full">
-        <Field
-          v-model="email.value"
-          :email-attrs="email.attr"
-          name="email"
-          placeholder="邮箱"
-          class="w-full p-2 rounded-1 text-white !bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="email" text="red" />
-      </div>
-      <div w="full">
-        <Field
-          v-model="password.value"
-          :password-attrs="password.attr"
-          name="password"
-          type="password"
-          placeholder="密码"
-          class="w-full p-2 rounded-1 text-white bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="password" text="red" />
-      </div>
+      <FormField :field="email" field-name="email" placeholder="邮箱" />
+      <FormField :field="password" field-name="password" placeholder="密码" />
 
       <div w="full" grid="~ cols-2">
         <Button

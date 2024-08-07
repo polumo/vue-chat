@@ -4,7 +4,7 @@ import type {
   AxiosRequestConfig,
   AxiosResponse,
 } from 'axios'
-import { toast } from 'vue3-toastify'
+import { useToast } from 'vue-toastification'
 
 export interface ApiResponse<T = any> {
   code: number
@@ -15,6 +15,8 @@ export interface ApiResponse<T = any> {
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BASE_API,
 })
+
+const toast = useToast()
 
 instance.interceptors.request.use(
   (config) => {
@@ -30,13 +32,14 @@ instance.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response
 
-    toast(data.message, { type: data.code !== 200 && data.code !== 201 ? 'error' : 'success' })
+    const type = data.code !== 200 && data.code !== 201 ? 'error' : 'success'
+    toast[type](data.message)
 
     return data
   },
   (error: AxiosError) => {
     const { message } = (error.response as any).data as ApiResponse
-    toast(message, { type: 'error' })
+    toast.error(message)
     return Promise.reject(error)
   },
 )

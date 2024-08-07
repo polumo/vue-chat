@@ -1,5 +1,11 @@
-const setToken = () => {
+import { useCookies } from '@vueuse/integrations/useCookies'
 
-}
+const { set, get, remove } = useCookies(['token'])
 
-export { setToken }
+const setToken = (value: string) => set('token', value)
+
+const getToken = () => get('token')
+
+const removeToken = () => remove('token')
+
+export { setToken, getToken, removeToken }

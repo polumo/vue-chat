@@ -14,6 +14,7 @@ export default defineConfig({
   plugins: [
     VueRouter({
       dts: 'types/typed-router.d.ts',
+      exclude: ['src/pages/**/components/*'], // 使组件不生成路由
     }),
     Vue(),
     VueJsx(),

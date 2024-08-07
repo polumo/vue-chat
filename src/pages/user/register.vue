@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ErrorMessage, Field } from 'vee-validate'
 import { z } from 'zod'
 import { useUserForm } from './user'
+import Logo from './components/Logo.vue'
+import FormField from './components/FormField.vue'
 import { registerUser } from '@/api/user'
+import { setToken } from '@/utils/token'
 
 const schema = z.object({
   username: z.string({ message: '用户名不能为空' }).min(6, '用户名至少6个字符'),
@@ -13,9 +15,14 @@ const schema = z.object({
 
 const { handleSubmit, resetForm, email, password, username, confirmPassword } = useUserForm(schema)
 
+const router = useRouter()
+
 const register = handleSubmit(async (values) => {
   const { data } = await registerUser(values)
-  console.log(data)
+  if (data) {
+    setToken(data)
+    router.push('/chat')
+  }
 })
 </script>
 
@@ -31,55 +38,12 @@ const register = handleSubmit(async (values) => {
       flex="~ col items-center"
       gap="8"
     >
-      <div f="c-c" gap="4">
-        <img src="/src/assets/logo.png" alt="Logo" w="20" object="contain">
-        <h1 uppercase text="8 white">
-          vuechat
-        </h1>
-      </div>
+      <Logo />
 
-      <div w="full">
-        <Field
-          v-model="email.value"
-          :email-attrs="email.attr"
-          name="email"
-          placeholder="邮箱"
-          class="w-full p-2 rounded-1 text-white !bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="email" text="red" />
-      </div>
-      <div w="full">
-        <Field
-          v-model="username.value"
-          :username-attrs="username.attr"
-          name="username"
-          placeholder="用户名"
-          class="w-full p-2 rounded-1 text-white bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="username" text="red" />
-      </div>
-      <div w="full">
-        <Field
-          v-model="password.value.value"
-          :password-attrs="password.attr"
-          name="password"
-          type="password"
-          placeholder="密码"
-          class="w-full p-2 rounded-1 text-white bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="password" text="red" />
-      </div>
-      <div w="full">
-        <Field
-          v-model="confirmPassword.value.value"
-          :confirm-password-attr="confirmPassword.attr"
-          name="confirmPassword"
-          type="password"
-          placeholder="确认密码"
-          class="w-full p-2 rounded-1 text-white bg-transparent border border-solid border-[rgb(56,72,93)]"
-        />
-        <ErrorMessage name="confirmPassword" text="red" />
-      </div>
+      <FormField :field="email" field-name="email" placeholder="邮箱" />
+      <FormField :field="username" field-name="username" placeholder="用户名" />
+      <FormField :field="password" field-name="password" placeholder="密码" />
+      <FormField :field="confirmPassword" field-name="confirmPassword" placeholder="确认密码" />
 
       <div w="full" grid="~ cols-2">
         <Button
